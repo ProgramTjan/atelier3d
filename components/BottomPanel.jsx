@@ -31,6 +31,8 @@ export function BottomPanel({
   designs,
   loadDesign,
   deleteDesign,
+  exportDesign,
+  importDesign,
 }) {
   return (
     <div style={S.bottom}>
@@ -169,6 +171,8 @@ export function BottomPanel({
             <button style={{ ...S.saveDesignBtn, borderColor: accent, color: accent }} onClick={saveDesign}>
               + Huidig ontwerp opslaan
             </button>
+            <button style={S.saveDesignBtn} onClick={exportDesign}>Export JSON</button>
+            <button style={S.saveDesignBtn} onClick={importDesign}>Import JSON</button>
             {!storageOk && <span style={S.storageWarn}>Opslag niet beschikbaar</span>}
           </div>
           {designs.length === 0 ? (

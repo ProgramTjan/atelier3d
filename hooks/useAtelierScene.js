@@ -2,7 +2,8 @@ import { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { ROOM_H } from "../constants.js";
 import { makeWallTexture, makeFloorTexture, textSprite } from "../textures.js";
-import { buildFurniture, mat } from "../furniture.js";
+import { buildItem, mat } from "../furniture.js";
+import { disposeObject3D } from "../lib/dispose.js";
 
 export function useAtelierScene({
   items,
@@ -126,13 +127,7 @@ export function useAtelierScene({
     if (!roomGroup) return;
     while (roomGroup.children.length) {
       const ch = roomGroup.children[0];
-      ch.traverse((o) => {
-        if (o.geometry) o.geometry.dispose();
-        if (o.material) {
-          if (o.material.map) o.material.map.dispose();
-          o.material.dispose();
-        }
-      });
+      disposeObject3D(ch);
       roomGroup.remove(ch);
     }
 
@@ -293,13 +288,13 @@ export function useAtelierScene({
     if (!furnitureRoot) return;
     while (furnitureRoot.children.length) {
       const child = furnitureRoot.children[0];
-      child.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+      disposeObject3D(child);
       furnitureRoot.remove(child);
     }
     const fps = {};
     const night = lighting === "avond";
     items.forEach((item) => {
-      const g = buildFurniture(item.type, item.c, item.v || 0);
+      const g = buildItem(item);
       // onzichtbaar grijpvlak: kleine objecten (wandlamp, wandplank) krijgen
       // een ruimer tikgebied zodat selecteren en slepen soepel gaat
       const localBox = new THREE.Box3().setFromObject(g);
@@ -415,6 +410,9 @@ export function useAtelierScene({
       }
     };
 
+    const findGroup = (id) =>
+      furnitureRoot.children.find((c) => c.userData.itemId === id);
+
     const onMove = (e) => {
       if (!pointersRef.current.has(e.pointerId)) return;
       pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -470,11 +468,20 @@ export function useAtelierScene({
           nx = THREE.MathUtils.clamp(nx, -w / 2 + 0.3, w / 2 - 0.3);
           nz = THREE.MathUtils.clamp(nz, -dep / 2 + 0.3, dep / 2 - 0.3);
         }
-        setItems((cur) => cur.map((i) => (i.id === d.id ? { ...i, x: nx, z: nz } : i)));
+        d.nx = nx;
+        d.nz = nz;
+        const group = findGroup(d.id);
+        if (group) group.position.set(nx, 0, nz);
+        const { ring } = threeRef.current;
+        if (ring) ring.position.set(nx, 0.02, nz);
       }
     };
 
     const onUp = (e) => {
+      const d = dragRef.current;
+      if (d?.id !== undefined && d.nx !== undefined) {
+        setItems((cur) => cur.map((i) => (i.id === d.id ? { ...i, x: d.nx, z: d.nz } : i)));
+      }
       pointersRef.current.delete(e.pointerId);
       if (pointersRef.current.size === 0) dragRef.current = null;
     };

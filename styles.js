@@ -167,4 +167,68 @@ export const styles = {
   },
   designName: { fontSize: 12.5, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
   designMeta: { fontSize: 11, color: "rgba(237,234,227,.5)", whiteSpace: "nowrap", marginLeft: "auto" },
+  editorOverlay: {
+    position: "fixed", inset: 0, zIndex: 100,
+    background: "rgba(10,12,15,.88)", display: "flex",
+    alignItems: "center", justifyContent: "center", padding: 16,
+  },
+  editorPanel: {
+    width: "min(960px, 96vw)", height: "min(640px, 92vh)",
+    background: "#23262B", borderRadius: 14,
+    border: "1px solid rgba(255,255,255,.12)",
+    display: "flex", flexDirection: "column", overflow: "hidden",
+  },
+  editorHeader: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    padding: "14px 18px", borderBottom: "1px solid rgba(255,255,255,.1)",
+  },
+  editorTitle: { display: "block", fontSize: 18, fontWeight: 700, color: "#F2EEE6" },
+  editorSubtitle: { display: "block", fontSize: 12, color: "rgba(237,234,227,.55)", marginTop: 2 },
+  editorClose: {
+    background: "transparent", border: "none", color: "#EDEAE3",
+    fontSize: 18, cursor: "pointer", padding: 4,
+  },
+  editorBody: { flex: 1, display: "flex", minHeight: 0 },
+  editorCanvas: { flex: 1, minWidth: 0, background: "#1a1d22" },
+  editorSidebar: {
+    width: 280, borderLeft: "1px solid rgba(255,255,255,.1)",
+    padding: 14, overflowY: "auto", display: "flex", flexDirection: "column", gap: 16,
+  },
+  editorSection: { display: "flex", flexDirection: "column", gap: 8 },
+  editorSectionTitle: {
+    fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase",
+    color: "rgba(237,234,227,.55)",
+  },
+  editorPartList: { display: "flex", flexDirection: "column", gap: 6 },
+  editorPartBtn: {
+    textAlign: "left", background: "rgba(40,44,50,.95)", color: "#E8E4DB",
+    border: "1px solid rgba(255,255,255,.14)", borderRadius: 8,
+    padding: "8px 10px", fontSize: 13, cursor: "pointer",
+  },
+  editorAddRow: { display: "flex", gap: 8 },
+  editorAddBtn: {
+    flex: 1, background: "rgba(30,33,38,.9)", color: "#EDEAE3",
+    border: "1px dashed rgba(255,255,255,.2)", borderRadius: 8,
+    padding: "7px 8px", fontSize: 12, cursor: "pointer",
+  },
+  editorDimRow: { display: "flex", alignItems: "center", gap: 8 },
+  editorDimLabel: { width: 72, fontSize: 12, color: "rgba(237,234,227,.65)" },
+  editorInput: {
+    flex: 1, background: "rgba(20,22,26,.9)", color: "#F4E9D2",
+    border: "1px solid rgba(255,255,255,.14)", borderRadius: 6,
+    padding: "6px 8px", fontSize: 13,
+  },
+  editorFooter: {
+    display: "flex", justifyContent: "flex-end", gap: 10,
+    padding: "12px 18px", borderTop: "1px solid rgba(255,255,255,.1)",
+  },
+  editorCancel: {
+    background: "transparent", color: "#EDEAE3",
+    border: "1px solid rgba(255,255,255,.18)", borderRadius: 8,
+    padding: "9px 16px", fontSize: 13, cursor: "pointer",
+  },
+  editorApply: {
+    border: "none", borderRadius: 8, padding: "9px 18px",
+    fontSize: 13, fontWeight: 700, cursor: "pointer",
+  },
 };

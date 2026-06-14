@@ -12,12 +12,16 @@ export function SelectionBar({
   duplicateSel,
   colorSel,
   deleteSel,
+  openEditor,
 }) {
   return (
     <div style={S.selBar}>
       <span style={S.selLabel}>
         {ALL_TYPES.find((c) => c.type === selItem.type)?.label || selItem.type}
       </span>
+      <button style={{ ...S.selBtn, color: accent }} onClick={openEditor}>
+        Tekenen
+      </button>
       {(VARIANT_COUNT[selItem.type] || 1) > 1 && (
         <button style={{ ...S.selBtn, color: accent }} onClick={cycleVariant}>
           Model {(selItem.v || 0) + 1}/{VARIANT_COUNT[selItem.type]}

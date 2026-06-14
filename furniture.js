@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { shade } from "./textures.js";
+import { buildFromCustom } from "./furniture/custom.js";
 
 export const mat = (c, rough = 0.85) =>
   new THREE.MeshStandardMaterial({ color: c, roughness: rough, metalness: 0.05 });
@@ -717,4 +718,18 @@ export function buildFurniture(type, color, v = 0) {
       g.add(box(0.5, 0.5, 0.5, fabric, 0, 0.25, 0));
   }
   return g;
+}
+
+const meshCache = new Map();
+
+/** Bouw meubel (preset, variant of custom tekenomgeving). */
+export function buildItem(item) {
+  if (item.custom?.parts?.length) {
+    return buildFromCustom(item.custom.parts, item.c);
+  }
+  const key = `${item.type}|${item.c}|${item.v || 0}`;
+  if (!meshCache.has(key)) {
+    meshCache.set(key, buildFurniture(item.type, item.c, item.v || 0));
+  }
+  return meshCache.get(key).clone(true);
 }

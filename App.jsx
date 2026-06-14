@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import {
   ITEM_COLORS,
@@ -7,15 +7,18 @@ import {
   VARIANT_COUNT,
 } from "./constants.js";
 import { PRESETS } from "./presets.js";
-import { nextItemId } from "./ids.js";
+import { nextItemId, syncItemIdCounter } from "./ids.js";
 import { styles } from "./styles.js";
-import { useItemHistory } from "./hooks/useItemHistory.js";
+import { useAppHistory } from "./hooks/useAppHistory.js";
 import { useDesignStorage } from "./hooks/useDesignStorage.js";
 import { useFullscreen } from "./hooks/useFullscreen.js";
 import { useAtelierScene } from "./hooks/useAtelierScene.js";
+import { useKeyboard } from "./hooks/useKeyboard.js";
+import { downloadDesignJson, importDesignFromFile } from "./lib/designExport.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { SelectionBar } from "./components/SelectionBar.jsx";
 import { BottomPanel } from "./components/BottomPanel.jsx";
+import { FurnitureEditor } from "./components/FurnitureEditor.jsx";
 
 export default function Atelier3D() {
   const appRef = useRef(null);
@@ -38,15 +41,11 @@ export default function Atelier3D() {
   const [floorFinish, setFloorFinish] = useState("hout");
   const [activePreset, setActivePreset] = useState("scandinavisch");
   const [panel, setPanel] = useState("meubels");
+  const [editorItemId, setEditorItemId] = useState(null);
 
-  const { pushHistory, pushHistoryRef, undo, canUndo } = useItemHistory(
-    itemsRef,
-    setItems,
-    setSelected,
-    setActivePreset
-  );
+  itemsRef.current = items;
 
-  const { designs, storageOk, saveDesign, loadDesign, deleteDesign } = useDesignStorage({
+  const getSnapshot = useCallback(() => ({
     items,
     roomW,
     roomD,
@@ -55,17 +54,28 @@ export default function Atelier3D() {
     floorColor,
     floorFinish,
     section,
+    activePreset,
+  }), [items, roomW, roomD, wallColor, wallFinish, floorColor, floorFinish, section, activePreset]);
+
+  const applySnapshot = useCallback((s) => {
+    setItems(s.items.map((i) => ({ ...i })));
+    setRoomW(s.roomW);
+    setRoomD(s.roomD);
+    setWallColor(s.wallColor);
+    setWallFinish(s.wallFinish);
+    setFloorColor(s.floorColor);
+    setFloorFinish(s.floorFinish);
+    setSection(s.section);
+    setActivePreset(s.activePreset ?? null);
+    setSelected(null);
+  }, []);
+
+  const { pushHistory, pushHistoryRef, undo, canUndo } = useAppHistory(getSnapshot, applySnapshot);
+
+  const { designs, storageOk, saveDesign, loadDesign, deleteDesign } = useDesignStorage({
+    getSnapshot,
     pushHistory,
-    setItems,
-    setRoomW,
-    setRoomD,
-    setWallColor,
-    setWallFinish,
-    setFloorColor,
-    setFloorFinish,
-    setSection,
-    setActivePreset,
-    setSelected,
+    applySnapshot,
   });
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(appRef);
@@ -94,6 +104,7 @@ export default function Atelier3D() {
   });
 
   const loadPreset = (key) => {
+    if (!window.confirm(`Preset "${PRESETS[key].label}" laden?`)) return;
     pushHistory();
     const p = PRESETS[key];
     setItems(p.items());
@@ -124,21 +135,25 @@ export default function Atelier3D() {
   };
 
   const rotateSel = (deg) => {
+    if (!selected) return;
     pushHistory();
     setItems((cur) => cur.map((i) => (i.id === selected ? { ...i, r: i.r + deg } : i)));
   };
+
   const colorSel = (c) => {
     pushHistory();
     setItems((cur) => cur.map((i) => (i.id === selected ? { ...i, c } : i)));
   };
+
   const cycleVariant = () => {
     pushHistory();
     setItems((cur) => cur.map((i) => {
       if (i.id !== selected) return i;
       const count = VARIANT_COUNT[i.type] || 1;
-      return { ...i, v: ((i.v || 0) + 1) % count };
+      return { ...i, v: ((i.v || 0) + 1) % count, custom: undefined };
     }));
   };
+
   const duplicateSel = () => {
     const src = items.find((i) => i.id === selected);
     if (!src) return;
@@ -146,25 +161,87 @@ export default function Atelier3D() {
     const id = nextItemId();
     const { w, d } = roomRef.current;
     setItems((cur) => [...cur, {
-      ...src, id,
+      ...src,
+      id,
+      custom: src.custom ? structuredClone(src.custom) : undefined,
       x: THREE.MathUtils.clamp(src.x + 0.35, -w / 2 + 0.3, w / 2 - 0.3),
       z: THREE.MathUtils.clamp(src.z + 0.35, -d / 2 + 0.3, d / 2 - 0.3),
     }]);
     setSelected(id);
   };
+
   const deleteSel = () => {
+    if (!selected) return;
     pushHistory();
     setItems((cur) => cur.filter((i) => i.id !== selected));
     setSelected(null);
   };
+
   const clearRoom = () => {
+    if (!window.confirm("Alle meubels verwijderen?")) return;
     pushHistory();
     setItems([]);
     setSelected(null);
     setActivePreset(null);
   };
 
+  const openEditor = () => {
+    if (!selected) return;
+    setEditorItemId(selected);
+  };
+
+  const applyCustom = (custom) => {
+    pushHistory();
+    setItems((cur) => cur.map((i) => (i.id === editorItemId ? { ...i, custom } : i)));
+    setEditorItemId(null);
+  };
+
+  const exportDesign = () => {
+    const snap = getSnapshot();
+    downloadDesignJson({
+      version: 1,
+      name: "Export",
+      ...snap,
+      exportedAt: new Date().toISOString(),
+    });
+  };
+
+  const importDesign = async () => {
+    try {
+      const data = await importDesignFromFile();
+      if (!window.confirm("Geïmporteerd ontwerp laden? Huidige wijzigingen gaan verloren.")) return;
+      pushHistory();
+      applySnapshot({
+        items: (data.items || []).map((i) => ({ ...i })),
+        roomW: data.roomW ?? 6,
+        roomD: data.roomD ?? 4.5,
+        wallColor: data.wallColor ?? "#F1EDE5",
+        wallFinish: data.wallFinish ?? "verf",
+        floorColor: data.floorColor ?? "#D7BE9C",
+        floorFinish: data.floorFinish ?? "hout",
+        section: data.section ?? "wonen",
+        activePreset: null,
+      });
+      if (data.items?.length) {
+        syncItemIdCounter(Math.max(...data.items.map((i) => i.id + 1)));
+      }
+    } catch (e) {
+      window.alert("Import mislukt — ongeldig JSON-bestand.");
+    }
+  };
+
+  useKeyboard(
+    {
+      onDelete: deleteSel,
+      onUndo: undo,
+      onEscape: () => setSelected(null),
+      onRotate: () => rotateSel(45),
+    },
+    !editorItemId
+  );
+
   const selItem = items.find((i) => i.id === selected);
+  const editorItem = items.find((i) => i.id === editorItemId);
   const presetsInSection = Object.entries(PRESETS).filter(([, p]) => p.section === section);
   const catalog = section === "bad" ? CATALOG_BAD : CATALOG_WONEN;
   const accent = section === "bad" ? "#8FB8AE" : "#E8B45A";
@@ -194,7 +271,7 @@ export default function Atelier3D() {
         clearRoom={clearRoom}
       />
 
-      {selItem && mode === "inrichten" && (
+      {selItem && mode === "inrichten" && !editorItemId && (
         <SelectionBar
           S={S}
           accent={accent}
@@ -207,6 +284,7 @@ export default function Atelier3D() {
           duplicateSel={duplicateSel}
           colorSel={colorSel}
           deleteSel={deleteSel}
+          openEditor={openEditor}
         />
       )}
 
@@ -241,7 +319,18 @@ export default function Atelier3D() {
         designs={designs}
         loadDesign={loadDesign}
         deleteDesign={deleteDesign}
+        exportDesign={exportDesign}
+        importDesign={importDesign}
       />
+
+      {editorItem && (
+        <FurnitureEditor
+          item={editorItem}
+          accent={accent}
+          onApply={applyCustom}
+          onClose={() => setEditorItemId(null)}
+        />
+      )}
     </div>
   );
 }

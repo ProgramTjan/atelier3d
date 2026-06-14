@@ -74,20 +74,34 @@ export function plankTexture(color) {
   return tex;
 }
 
+const wallTexCache = new Map();
+const floorTexCache = new Map();
+
 export function makeWallTexture(finish, color) {
+  const key = `wall|${finish}|${color}`;
+  if (wallTexCache.has(key)) return wallTexCache.get(key);
+  let tex = null;
   switch (finish) {
-    case "vierkant": return tileTexture({ tileW: 0.3, tileH: 0.3, offset: false, color, variation: 0.05, gloss: true });
-    case "metro": return tileTexture({ tileW: 0.3, tileH: 0.15, offset: true, color, variation: 0.04, gloss: true });
-    case "zellige": return tileTexture({ tileW: 0.12, tileH: 0.12, offset: false, color, variation: 0.16, gloss: true });
+    case "vierkant": tex = tileTexture({ tileW: 0.3, tileH: 0.3, offset: false, color, variation: 0.05, gloss: true }); break;
+    case "metro": tex = tileTexture({ tileW: 0.3, tileH: 0.15, offset: true, color, variation: 0.04, gloss: true }); break;
+    case "zellige": tex = tileTexture({ tileW: 0.12, tileH: 0.12, offset: false, color, variation: 0.16, gloss: true }); break;
     default: return null;
   }
+  wallTexCache.set(key, tex);
+  return tex;
 }
+
 export function makeFloorTexture(finish, color) {
+  const key = `floor|${finish}|${color}`;
+  if (floorTexCache.has(key)) return floorTexCache.get(key);
+  let tex = null;
   switch (finish) {
-    case "hout": return plankTexture(color);
-    case "tegel": return tileTexture({ tileW: 0.4, tileH: 0.4, offset: false, color, variation: 0.06, gloss: false });
+    case "hout": tex = plankTexture(color); break;
+    case "tegel": tex = tileTexture({ tileW: 0.4, tileH: 0.4, offset: false, color, variation: 0.06, gloss: false }); break;
     default: return null;
   }
+  floorTexCache.set(key, tex);
+  return tex;
 }
 
 // tekstlabel als sprite (voor maatvoering in plattegrond)
