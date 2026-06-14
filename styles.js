@@ -239,4 +239,20 @@ export const styles = {
     border: "none", borderRadius: 8, padding: "9px 18px",
     fontSize: 13, fontWeight: 700, cursor: "pointer",
   },
+  installBanner: {
+    position: "fixed", bottom: 148, left: "50%", transform: "translateX(-50%)",
+    zIndex: 90, display: "flex", alignItems: "center", gap: 10,
+    background: "rgba(28,31,36,.96)", border: "1px solid rgba(255,255,255,.14)",
+    borderRadius: 12, padding: "10px 14px", maxWidth: "92vw",
+    boxShadow: "0 8px 32px rgba(0,0,0,.35)",
+  },
+  installText: { fontSize: 12.5, color: "#EDEAE3", lineHeight: 1.35 },
+  installBtn: {
+    border: "none", borderRadius: 8, padding: "7px 12px",
+    fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
+  },
+  installDismiss: {
+    background: "transparent", border: "none", color: "rgba(237,234,227,.6)",
+    fontSize: 16, cursor: "pointer", padding: 4, flexShrink: 0,
+  },
 };

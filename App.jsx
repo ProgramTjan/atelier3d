@@ -19,6 +19,7 @@ import { TopBar } from "./components/TopBar.jsx";
 import { SelectionBar } from "./components/SelectionBar.jsx";
 import { BottomPanel } from "./components/BottomPanel.jsx";
 import { FurnitureEditor } from "./components/FurnitureEditor.jsx";
+import { InstallBanner } from "./components/InstallBanner.jsx";
 
 export default function Atelier3D() {
   const appRef = useRef(null);
@@ -331,6 +332,8 @@ export default function Atelier3D() {
           onClose={() => setEditorItemId(null)}
         />
       )}
+
+      <InstallBanner accent={accent} />
     </div>
   );
 }
