@@ -168,15 +168,44 @@ export const styles = {
   designName: { fontSize: 12.5, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
   designMeta: { fontSize: 11, color: "rgba(237,234,227,.5)", whiteSpace: "nowrap", marginLeft: "auto" },
   editorOverlay: {
-    position: "fixed", inset: 0, zIndex: 100,
+    position: "fixed", inset: 0, zIndex: 150,
     background: "rgba(10,12,15,.88)", display: "flex",
     alignItems: "center", justifyContent: "center", padding: 16,
+  },
+  editorOverlayMobile: {
+    padding: 0, alignItems: "stretch", justifyContent: "stretch",
   },
   editorPanel: {
     width: "min(960px, 96vw)", height: "min(640px, 92vh)",
     background: "#23262B", borderRadius: 14,
     border: "1px solid rgba(255,255,255,.12)",
     display: "flex", flexDirection: "column", overflow: "hidden",
+  },
+  editorPanelMobile: {
+    width: "100%", height: "100%", maxWidth: "none", maxHeight: "none",
+    borderRadius: 0, border: "none",
+  },
+  editorMobileTabs: {
+    display: "flex", gap: 6, padding: "8px 12px",
+    borderBottom: "1px solid rgba(255,255,255,.1)", flexShrink: 0,
+  },
+  editorMobileTab: {
+    flex: 1, background: "rgba(30,33,38,.9)", color: "rgba(237,234,227,.65)",
+    border: "1px solid rgba(255,255,255,.12)", borderRadius: 8,
+    padding: "8px 6px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+  },
+  editorMobileTabActive: {
+    color: "#1C1E22",
+  },
+  editorPlanRowMobile: {
+    flexDirection: "column", overflowY: "auto", minHeight: 0,
+  },
+  editorFooterMobile: {
+    flexDirection: "column", gap: 8,
+    paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
+  },
+  editorFooterBtnMobile: {
+    width: "100%", textAlign: "center",
   },
   editorHeader: {
     display: "flex", alignItems: "center", justifyContent: "space-between",

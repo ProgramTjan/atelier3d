@@ -333,7 +333,7 @@ export default function Atelier3D() {
         />
       )}
 
-      <InstallBanner accent={accent} />
+      <InstallBanner accent={accent} hidden={!!editorItemId} />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { styles } from "../styles.js";
 
 /** Toont 'Installeren' op mobiel wanneer PWA-installatie beschikbaar is. */
-export function InstallBanner({ accent = "#E8B45A" }) {
+export function InstallBanner({ accent = "#E8B45A", hidden = false }) {
   const [prompt, setPrompt] = useState(null);
   const [dismissed, setDismissed] = useState(
     () => localStorage.getItem("atelier-pwa-dismiss") === "1"
@@ -37,7 +37,7 @@ export function InstallBanner({ accent = "#E8B45A" }) {
     setDismissed(true);
   };
 
-  if (isStandalone || dismissed) return null;
+  if (hidden || isStandalone || dismissed) return null;
 
   const S = styles;
 
