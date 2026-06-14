@@ -189,6 +189,8 @@ export const styles = {
     fontSize: 18, cursor: "pointer", padding: 4,
   },
   editorBody: { flex: 1, display: "flex", minHeight: 0 },
+  editorMainCol: { flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 },
+  editorPlanRow: { display: "flex", flex: 1, minHeight: 160, borderTop: "1px solid rgba(255,255,255,.08)" },
   editorCanvas: { flex: 1, minWidth: 0, background: "#1a1d22" },
   editorSidebar: {
     width: 280, borderLeft: "1px solid rgba(255,255,255,.1)",
@@ -210,6 +212,12 @@ export const styles = {
     flex: 1, background: "rgba(30,33,38,.9)", color: "#EDEAE3",
     border: "1px dashed rgba(255,255,255,.2)", borderRadius: 8,
     padding: "7px 8px", fontSize: 12, cursor: "pointer",
+  },
+  editorShapeGrid: { display: "flex", flexWrap: "wrap", gap: 6 },
+  editorShapeBtn: {
+    background: "rgba(40,44,50,.95)", color: "#E8E4DB",
+    border: "1px solid rgba(255,255,255,.14)", borderRadius: 8,
+    padding: "6px 10px", fontSize: 11, cursor: "pointer", whiteSpace: "nowrap",
   },
   editorDimRow: { display: "flex", alignItems: "center", gap: 8 },
   editorDimLabel: { width: 72, fontSize: 12, color: "rgba(237,234,227,.65)" },
